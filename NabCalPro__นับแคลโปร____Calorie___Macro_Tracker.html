@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="th" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NabCalPro (นับแคลโปร) — คู่หูนับแคลอรี่และสารอาหารประจำวัน</title>
+  <meta name="description" content="NabCalPro (นับแคลโปร) — เว็บแอปนับแคลอรี่ คำนวณ BMR/TDEE และมาโครแบบไม่เครียด พร้อมน้องมาสคอตคอยให้กำลังใจทุกมื้อ" />
+
+  <!-- Google Fonts Fallback (Mali for rounded Thai + Fredoka for rounded English) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Mali:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cream: '#FFFDF7',
+            creamSoft: '#FAF5E8',
+            cocoa: '#4A2C20',
+            cocoaLight: '#7A584A',
+            pear: '#9BC53D',
+            pearDark: '#7EA82B',
+            pearSoft: '#F1F8E2',
+            apple: '#E55934',
+            appleSoft: '#FDECE7',
+            blush: '#FFD6D6',
+            blushSoft: '#FFF0F0',
+            borderWarm: '#EFE5D6'
+          },
+          fontFamily: {
+            brand: ['"NabCalPro"', '"Mali"', '"Fredoka"', 'sans-serif'],
+            sans: ['"NabCalPro"', '"Mali"', '"Fredoka"', 'sans-serif'],
+            mono: ['"NabCalPro"', '"Mali"', '"Fredoka"', 'monospace']
+          },
+          boxShadow: {
+            kawaii: '0 4px 0 0 #4A2C20',
+            kawaiiSm: '0 3px 0 0 #4A2C20',
+            kawaiiLg: '0 8px 0 0 #4A2C20',
+            soft: '0 14px 34px -10px rgba(74, 44, 32, 0.10)'
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* =========================================================
+       Custom Font Setup: NabCalPro-Real-v18-complete
+       Ready for Vercel deployment inside /fonts/ directory
+       ========================================================= */
+    @font-face {
+      font-family: 'NabCalPro';
+      src: url('/fonts/NabCalPro-Real-v18-complete.woff2') format('woff2'),
+           url('/fonts/NabCalPro-Real-v18-complete.woff') format('woff'),
+           url('/fonts/NabCalPro-Real-v18-complete.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'NabCalPro';
+      src: url('/fonts/NabCalPro-Real-v18-complete.woff2') format('woff2'),
+           url('/fonts/NabCalPro-Real-v18-complete.woff') format('woff'),
+           url('/fonts/NabCalPro-Real-v18-complete.ttf') format('truetype');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    /* Apply NabCalPro with rounded Thai/EN fallbacks globally */
+    html, body, *, *::before, *::after, button, input, select, textarea, code, kbd, pre {
+      font-family: 'NabCalPro', 'Mali', 'Fredoka', sans-serif !important;
+    }
+
+    body {
+      background-color: #FFFDF7;
+      color: #4A2C20;
+      overflow-x: hidden;
+    }
+
+    /* Playful subtle dot background for Hero */
+    .bg-dots {
+      background-image: radial-gradient(#E8DCC8 1.5px, transparent 1.5px);
+      background-size: 24px 24px;
+    }
+
+    /* Mascot gentle float animation */
+    @keyframes mascotFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(1.2deg); }
+    }
+    .animate-mascot {
+      animation: mascotFloat 4.2s ease-in-out infinite;
+    }
+
+    /* Floating macro pill animations */
+    @keyframes pillFloatA {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-7px); }
+    }
+    @keyframes pillFloatB {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(7px); }
+    }
+    .animate-pill-a {
+      animation: pillFloatA 3.6s ease-in-out infinite;
+    }
+    .animate-pill-b {
+      animation: pillFloatB 4.4s ease-in-out infinite;
+    }
+
+    /* Interactive tactile press effect */
+    .btn-kawaii {
+      transition: transform 0.14s ease, box-shadow 0.14s ease, background-color 0.15s ease;
+    }
+    .btn-kawaii:hover {
+      transform: translateY(-1px);
+    }
+    .btn-kawaii:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 0 #4A2C20 !important;
+    }
+
+    /* SVG Ring smooth transition */
+    .progress-ring-circle {
+      transition: stroke-dashoffset 0.55s cubic-bezier(0.34, 1.56, 0.64, 1), stroke 0.3s ease;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+
+    /* Toast animation */
+    @keyframes toastIn {
+      from { opacity: 0; transform: translate(-50%, 16px) scale(0.95); }
+      to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+    }
+    .toast-show {
+      animation: toastIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    /* Clean number inputs */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-blush selection:text-cocoa">
+
+  <!-- =========================================================
+       STICKY NAVBAR
+       ========================================================= -->
+  <header class="sticky top-0 z-40 bg-cream/90 backdrop-blur-md border-b-2 border-borderWarm">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-3">
+      <!-- Brand Logo + Mini Mascot Badge -->
+      <a href="#top" class="flex items-center gap-2.5 group focus:outline-none shrink-0">
+        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-pearSoft border-2 border-cocoa shadow-kawaiiSm flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform">
+          <!-- Mini Mascot SVG Badge -->
+          <svg viewBox="0 0 64 64" class="w-9 h-9" aria-hidden="true">
+            <path d="M32 7 C34 12, 39 14, 39 20 C45 21, 48 26, 47 32 C52 36, 51 45, 45 49 C39 54, 25 54, 19 49 C13 45, 12 36, 17 32 C16 26, 19 21, 25 20 C25 14, 30 12, 32 7 Z" fill="#F9FBE7" stroke="#4A2C20" stroke-width="3" stroke-linejoin="round"/>
+            <circle cx="43" cy="18" r="5" fill="#E55934" stroke="#4A2C20" stroke-width="2.2"/>
+            <circle cx="25" cy="34" r="3.2" fill="#4A2C20"/>
+            <circle cx="24" cy="33" r="1.1" fill="#FFFFFF"/>
+            <circle cx="39" cy="34" r="3.2" fill="#4A2C20"/>
+            <circle cx="38" cy="33" r="1.1" fill="#FFFFFF"/>
+            <ellipse cx="20.5" cy="39" rx="3" ry="1.8" fill="#FFD6D6"/>
+            <ellipse cx="43.5" cy="39" rx="3" ry="1.8" fill="#FFD6D6"/>
+            <path d="M29 38.5 Q32 43 35 38.5 Z" fill="#E55934" stroke="#4A2C20" stroke-width="1.8" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="leading-tight">
+          <span class="font-brand font-bold text-lg sm:text-xl tracking-tight text-cocoa block">NabCalPro</span>
+          <span class="text-[11px] font-medium text-cocoaLight hidden sm:block" data-i18n="brandSub">นับแคลโปร • คู่หูดูแลสุขภาพ</span>
+        </div>
+      </a>
+
+      <!-- Smooth-scroll Navigation Links (Desktop) -->
+      <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-cocoaLight" aria-label="Primary Navigation">
+        <a href="#features" class="hover:text-cocoa transition-colors py-2" data-i18n="navFeatures">จุดเด่น</a>
+        <a href="#calculator" class="hover:text-cocoa transition-colors py-2" data-i18n="navCalculator">คำนวณแคล</a>
+        <a href="#tracker" class="hover:text-cocoa transition-colors py-2" data-i18n="navTracker">บันทึกอาหาร</a>
+      </nav>
+
+      <!-- Right Actions: EN/TH Toggle + CTA -->
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+        <!-- Language Switcher -->
+        <div class="inline-flex items-center bg-creamSoft border-2 border-cocoa rounded-xl p-0.5 shadow-kawaiiSm" role="group" aria-label="Language Switcher">
+          <button id="langEnBtn" type="button" class="px-2.5 py-1 text-xs font-bold rounded-lg transition-colors text-cocoa hover:bg-blushSoft">EN</button>
+          <button id="langThBtn" type="button" class="px-2.5 py-1 text-xs font-bold rounded-lg transition-colors bg-cocoa text-cream">TH</button>
+        </div>
+
+        <!-- Primary Nav CTA -->
+        <a href="#tracker" class="btn-kawaii inline-flex items-center gap-1.5 bg-pear hover:bg-pearDark text-cocoa font-bold text-xs sm:text-sm px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl border-2 border-cocoa shadow-kawaiiSm">
+          <span data-i18n="navCta">เริ่มนับแคล</span>
+          <span aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Mobile Quick-Jump Strip -->
+    <div class="md:hidden border-t border-borderWarm bg-creamSoft/80 px-4 py-2 flex items-center justify-around text-xs font-bold text-cocoaLight">
+      <a href="#calculator" class="px-3 py-1 rounded-lg hover:bg-white hover:text-cocoa transition-colors" data-i18n="navCalculator">คำนวณแคล</a>
+      <a href="#tracker" class="px-3 py-1 rounded-lg hover:bg-white hover:text-cocoa transition-colors" data-i18n="navTracker">บันทึกอาหาร</a>
+      <a href="#features" class="px-3 py-1 rounded-lg hover:bg-white hover:text-cocoa transition-colors" data-i18n="navFeatures">จุดเด่น</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- =========================================================
+         HERO SECTION
+         ========================================================= -->
+    <section class="relative overflow-hidden bg-dots border-b-2 border-borderWarm">
+      <!-- Soft pastel ambient blobs -->
+      <div class="pointer-events-none absolute -top-24 -left-24 w-72 h-72 rounded-full bg-pear/15 blur-3xl"></div>
+      <div class="pointer-events-none absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-blush/50 blur-3xl"></div>
+
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+
+          <!-- Hero Left Copy -->
+          <div class="lg:col-span-6 text-center lg:text-left">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border-2 border-cocoa shadow-kawaiiSm text-xs sm:text-sm font-semibold text-cocoa mb-6">
+              <span class="w-2.5 h-2.5 rounded-full bg-pear inline-block animate-pulse"></span>
+              <span data-i18n="heroBadge">ผู้ช่วยนับแคลและสารอาหารแบบไม่เครียด</span>
+            </div>
+
+            <h1 class="font-brand font-bold text-4xl sm:text-5xl lg:text-6xl leading-[1.15] tracking-tight text-cocoa mb-5">
+              <span data-i18n="heroTitle1">นับแคลอรี่ง่ายๆ</span>
+              <span class="block text-pearDark mt-1" data-i18n="heroTitle2">สนุกได้ทุกมื้อ</span>
+            </h1>
+
+            <p class="text-base sm:text-lg text-cocoaLight max-w-xl mx-auto lg:mx-0 mb-8 leading-relaxed" data-i18n="heroSubtitle">
+              พบกับ NabCalPro (นับแคลโปร) — คู่หูดูแลโภชนาการประจำวัน คำนวณค่า BMR &amp; TDEE แม่นยำในไม่กี่วินาที แตะบันทึกมื้ออาหารทันใจ พร้อมดูสัดส่วนมาโครแบบเรียลไทม์
+            </p>
+
+            <!-- Hero CTAs -->
+            <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5">
+              <a href="#calculator" class="btn-kawaii w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-pear hover:bg-pearDark text-cocoa font-bold text-base px-7 py-3.5 rounded-2xl border-2 border-cocoa shadow-kawaii">
+                <span>🧮</span>
+                <span data-i18n="heroCtaPrimary">คำนวณแคลอรี่ของฉัน</span>
+              </a>
+              <a href="#tracker" class="btn-kawaii w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white hover:bg-creamSoft text-cocoa font-bold text-base px-7 py-3.5 rounded-2xl border-2 border-cocoa shadow-kawaii">
+                <span>🍐</span>
+                <span data-i18n="heroCtaSecondary">เปิดสมุดบันทึกวันนี้</span>
+              </a>
+            </div>
+
+            <!-- Quick Trust Pills -->
+            <div class="mt-8 flex flex-wrap items-center justify-center lg:justify-start gap-2.5 sm:gap-3 text-xs font-semibold text-cocoaLight">
+              <span class="inline-flex items-center gap-1.5 bg-white/85 px-3 py-1.5 rounded-xl border border-borderWarm">
+                ✅ <span data-i18n="heroPill1">สูตรมาตรฐาน Mifflin-St Jeor</span>
+              </span>
+              <span class="inline-flex items-center gap-1.5 bg-white/85 px-3 py-1.5 rounded-xl border border-borderWarm">
+                ⚡ <span data-i18n="heroPill2">บันทึกอัตโนมัติในเครื่อง</span>
+              </span>
+              <span class="inline-flex items-center gap-1.5 bg-white/85 px-3 py-1.5 rounded-xl border border-borderWarm">
+                ✨ <span data-i18n="heroPill3">รองรับ ไทย / อังกฤษ</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Hero Right Animated Mascot Card -->
+          <div class="lg:col-span-6 flex justify-center">
+            <div class="relative w-full max-w-md bg-white rounded-[2rem] border-2 border-cocoa shadow-kawaiiLg p-6 sm:p-8">
+
+              <!-- Reactive Mascot Speech Bubble -->
+              <div id="heroSpeechBubble" class="relative bg-creamSoft border-2 border-cocoa rounded-2xl px-4 py-2.5 text-center text-sm font-bold text-cocoa shadow-kawaiiSm mb-4">
+                <span id="heroSpeechText">พร้อมนับแคลอร่อยๆ ไปด้วยกันหรือยัง? 🍐✨</span>
+                <!-- Speech Bubble Tail -->
+                <div class="absolute left-1/2 -bottom-2.5 -translate-x-1/2 w-4 h-4 bg-creamSoft border-r-2 border-b-2 border-cocoa rotate-45"></div>
+              </div>
+
+              <!-- Mascot Stage -->
+              <div class="relative flex items-center justify-center py-4">
+                <!-- Soft radial backdrop behind mascot -->
+                <div class="w-56 h-56 sm:w-64 sm:h-64 rounded-full bg-gradient-to-b from-pearSoft via-cream to-blushSoft border-2 border-dashed border-borderWarm flex items-center justify-center">
+                  <svg viewBox="0 0 320 300" class="w-60 h-56 sm:w-72 sm:h-64 animate-mascot overflow-visible" role="img" aria-label="NabCalPro Cute Swirl Mascot holding a pear and calculator">
+                    <defs>
+                      <!-- Cream body shading -->
+                      <linearGradient id="creamGrad" x1="20%" y1="10%" x2="85%" y2="95%">
+                        <stop offset="0%" stop-color="#FFFFFF"/>
+                        <stop offset="55%" stop-color="#F8FAE8"/>
+                        <stop offset="100%" stop-color="#E7EFCF"/>
+                      </linearGradient>
+                      <!-- Pear gradient -->
+                      <linearGradient id="pearGrad" x1="20%" y1="10%" x2="80%" y2="90%">
+                        <stop offset="0%" stop-color="#C3E362"/>
+                        <stop offset="55%" stop-color="#9BC53D"/>
+                        <stop offset="100%" stop-color="#7EA82B"/>
+                      </linearGradient>
+                      <!-- Apple gradient -->
+                      <linearGradient id="appleGrad" x1="20%" y1="10%" x2="80%" y2="90%">
+                        <stop offset="0%" stop-color="#FF7857"/>
+                        <stop offset="60%" stop-color="#E55934"/>
+                        <stop offset="100%" stop-color="#C63E1D"/>
+                      </linearGradient>
+                      <!-- Blush cheek gradient -->
+                      <radialGradient id="blushGrad" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#FF9E9E" stop-opacity="0.85"/>
+                        <stop offset="100%" stop-color="#FFD6D6" stop-opacity="0"/>
+                      </radialGradient>
+                    </defs>
+
+                    <!-- Ground soft shadow -->
+                    <ellipse cx="162" cy="274" rx="58" ry="10" fill="#4A2C20" opacity="0.10"/>
+
+                    <!-- Little legs -->
+                    <path d="M135 232 C136 254, 149 266, 154 258 C158 250, 155 237, 153 230 Z" fill="#F8FAE8" stroke="#4A2C20" stroke-width="4.5" stroke-linejoin="round"/>
+                    <path d="M174 230 C180 247, 195 256, 200 248 C204 240, 195 227, 189 224 Z" fill="#F8FAE8" stroke="#4A2C20" stroke-width="4.5" stroke-linejoin="round"/>
+
+                    <!-- Left Arm holding Pear -->
+                    <path d="M106 186 C86 186, 75 174, 72 162 C78 156, 88 164, 108 168" fill="#F8FAE8" stroke="#4A2C20" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+                    <!-- Main Fluffy Cream Swirl Body -->
+                    <path d="M158 26
+                             C164 40, 146 52, 134 62
+                             C116 66, 106 80, 110 95
+                             C92 103, 86 122, 94 139
+                             C80 152, 80 176, 94 191
+                             C92 214, 114 234, 146 234
+                             C162 242, 186 240, 203 227
+                             C228 220, 240 198, 232 175
+                             C241 158, 238 135, 222 124
+                             C229 107, 222 86, 204 78
+                             C204 60, 188 46, 174 34
+                             C168 29, 162 25, 158 26 Z"
+                          fill="url(#creamGrad)" stroke="#4A2C20" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+
+                    <!-- Cream Swirl Inner Creases -->
+                    <path d="M126 89 C145 97, 174 91, 188 76" fill="none" stroke="#DCE7BF" stroke-width="6" stroke-linecap="round"/>
+                    <path d="M150 116 C174 118, 199 109, 211 94" fill="none" stroke="#DCE7BF" stroke-width="6" stroke-linecap="round"/>
+                    <path d="M188 142 C206 142, 220 135, 226 125" fill="none" stroke="#DCE7BF" stroke-width="5" stroke-linecap="round"/>
+
+                    <!-- Cute Red Apple tucked in upper-right swirl -->
+                    <g transform="translate(185, 52) rotate(10)">
+                      <path d="M22 12 C23 4, 26 0, 28 -2" fill="none" stroke="#4A2C20" stroke-width="3.5" stroke-linecap="round"/>
+                      <path d="M25 6 C32 1, 39 2, 41 6 C36 11, 29 11, 25 6 Z" fill="#9BC53D" stroke="#4A2C20" stroke-width="2.5" stroke-linejoin="round"/>
+                      <path d="M22 13 C12 8, 3 16, 4 27 C5 38, 13 46, 20 44 C22 43, 24 43, 26 44 C33 46, 41 38, 41 27 C41 16, 32 8, 22 13 Z" fill="url(#appleGrad)" stroke="#4A2C20" stroke-width="3.8" stroke-linejoin="round"/>
+                      <ellipse cx="14" cy="22" rx="3" ry="5.5" transform="rotate(-18 14 22)" fill="#FFFFFF" opacity="0.55"/>
+                    </g>
+
+                    <!-- Cute Green Pear in Left Hand -->
+                    <g transform="translate(52, 102) rotate(-12)">
+                      <path d="M22 14 C23 6, 26 2, 28 0" fill="none" stroke="#4A2C20" stroke-width="3.5" stroke-linecap="round"/>
+                      <path d="M22 8 C14 3, 7 5, 5 9 C10 14, 17 13, 22 8 Z" fill="#9BC53D" stroke="#4A2C20" stroke-width="2.5" stroke-linejoin="round"/>
+                      <path d="M22 14 C14 15, 11 26, 8 36 C2 48, 6 63, 21 63 C36 63, 41 48, 35 36 C32 26, 30 15, 22 14 Z" fill="url(#pearGrad)" stroke="#4A2C20" stroke-width="3.8" stroke-linejoin="round"/>
+                      <ellipse cx="14" cy="43" rx="3" ry="7" transform="rotate(-10 14 43)" fill="#FFFFFF" opacity="0.5"/>
+                    </g>
+
+                    <!-- Eyebrows -->
+                    <path d="M121 128 Q128 123 135 126" fill="none" stroke="#4A2C20" stroke-width="4" stroke-linecap="round"/>
+                    <path d="M180 127 Q187 123 194 128" fill="none" stroke="#4A2C20" stroke-width="4" stroke-linecap="round"/>
+
+                    <!-- Left Big Shiny Eye -->
+                    <g>
+                      <ellipse cx="132" cy="154" rx="16" ry="18" fill="#4A2C20"/>
+                      <path d="M113 145 L119 149" stroke="#4A2C20" stroke-width="3.5" stroke-linecap="round"/>
+                      <circle cx="127" cy="147" r="6" fill="#FFFFFF"/>
+                      <circle cx="137" cy="161" r="3.2" fill="#FFFFFF"/>
+                      <path d="M123 165 Q132 170 141 164" fill="none" stroke="#8A5A44" stroke-width="3" stroke-linecap="round"/>
+                    </g>
+
+                    <!-- Right Big Shiny Eye -->
+                    <g>
+                      <ellipse cx="185" cy="155" rx="16" ry="18" fill="#4A2C20"/>
+                      <path d="M204 146 L198 150" stroke="#4A2C20" stroke-width="3.5" stroke-linecap="round"/>
+                      <circle cx="180" cy="148" r="6" fill="#FFFFFF"/>
+                      <circle cx="190" cy="162" r="3.2" fill="#FFFFFF"/>
+                      <path d="M176 166 Q185 171 194 165" fill="none" stroke="#8A5A44" stroke-width="3" stroke-linecap="round"/>
+                    </g>
+
+                    <!-- Rosy Blush Cheeks -->
+                    <ellipse cx="112" cy="175" rx="15" ry="9" fill="url(#blushGrad)"/>
+                    <ellipse cx="204" cy="176" rx="15" ry="9" fill="url(#blushGrad)"/>
+
+                    <!-- Happy Open Smile -->
+                    <path d="M148 168 Q159 172 170 167 C171 182, 165 190, 158 190 C151 190, 146 181, 148 168 Z" fill="#8E3B2E" stroke="#4A2C20" stroke-width="3.8" stroke-linejoin="round"/>
+                    <path d="M151 182 Q158 176 166 183 C164 188, 154 189, 151 182 Z" fill="#FF8C82"/>
+
+                    <!-- Retro Olive-Green Pocket Calculator in Right Hand -->
+                    <g transform="translate(198, 178) rotate(18)">
+                      <rect x="0" y="0" width="44" height="54" rx="8" fill="#B5C98B" stroke="#4A2C20" stroke-width="4"/>
+                      <rect x="7" y="7" width="30" height="12" rx="3" fill="#E6F0CE" stroke="#4A2C20" stroke-width="2.5"/>
+                      <rect x="7" y="24" width="6" height="6" rx="1.5" fill="#F8FAE8" stroke="#4A2C20" stroke-width="1.8"/>
+                      <rect x="15.5" y="24" width="6" height="6" rx="1.5" fill="#F8FAE8" stroke="#4A2C20" stroke-width="1.8"/>
+                      <rect x="24" y="24" width="6" height="6" rx="1.5" fill="#F8FAE8" stroke="#4A2C20" stroke-width="1.8"/>
+                      <rect x="32.5" y="24" width="5" height="6" rx="1.5" fill="#E55934" stroke="#4A2C20" stroke-width="1.8"/>
+                      <rect x="7" y="33" width="6" height="6" rx="1.5" fill="#F8FAE8" stroke="#4A2C20" stroke-width="1.8"/>
+                      <rect x="15.5" y="33" width="6" height="6" rx="1.5" fill="#F8FAE8" stroke="#4A2C20" stroke-width="1.8"/>
+                      <rect x="24" y="33" width="6" height="6" rx="1.5" fill="#F8FAE8" stroke="#4A2C20" stroke-width="1.8"/>
+                      <rect x="32.5" y="33" width="5" height="15" rx="1.5" fill="#E55934" stroke="#4A2C20" stroke-width="1.8"/>
+                      <rect x="7" y="42" width="6" height="6" rx="1.5" fill="#F8FAE8" stroke="#4A2C20" stroke-width="1.8"/>
+                      <rect x="15.5" y="42" width="6" height="6" rx="1.5" fill="#F8FAE8" stroke="#4A2C20" stroke-width="1.8"/>
+                      <rect x="24" y="42" width="6" height="6" rx="1.5" fill="#F8FAE8" stroke="#4A2C20" stroke-width="1.8"/>
+                    </g>
+
+                    <!-- Right Arm tucking around Calculator -->
+                    <path d="M225 168 C242 175, 249 192, 241 206 C235 212, 227 204, 229 194" fill="#F8FAE8" stroke="#4A2C20" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+
+                <!-- Floating Macro Pills -->
+                <div class="animate-pill-a absolute -left-2 sm:-left-5 top-8 bg-pearSoft border-2 border-cocoa rounded-2xl px-3 py-1.5 shadow-kawaiiSm flex items-center gap-1.5 text-xs font-bold text-cocoa">
+                  <span>🍐</span>
+                  <span data-i18n="pillPear">ลูกแพร์ 100 แคล</span>
+                </div>
+
+                <div class="animate-pill-b absolute -right-2 sm:-right-4 top-4 bg-appleSoft border-2 border-cocoa rounded-2xl px-3 py-1.5 shadow-kawaiiSm flex items-center gap-1.5 text-xs font-bold text-cocoa">
+                  <span>🍎</span>
+                  <span data-i18n="pillApple">แอปเปิ้ล 95 แคล</span>
+                </div>
+
+                <div class="animate-pill-a absolute right-0 sm:-right-3 bottom-2 bg-white border-2 border-cocoa rounded-2xl px-3.5 py-1.5 shadow-kawaiiSm flex items-center gap-1.5 text-xs font-bold text-pearDark">
+                  <span>🎯</span>
+                  <span data-i18n="pillTarget">ถึงเป้าหมาย!</span>
+                </div>
+              </div>
+
+              <!-- Live Mini Summary Bar inside Mascot Card -->
+              <div class="mt-3 pt-4 border-t-2 border-dashed border-borderWarm flex items-center justify-between text-xs sm:text-sm font-bold">
+                <div class="flex items-center gap-2">
+                  <span class="w-3 h-3 rounded-full bg-pear inline-block border border-cocoa"></span>
+                  <span class="text-cocoaLight" data-i18n="heroMiniGoal">เป้าหมายวันนี้:</span>
+                </div>
+                <span id="heroGoalDisplay" class="text-cocoa font-brand text-base">2,000 kcal</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         INTERACTIVE BMR / TDEE & MACRO CALCULATOR
+         ========================================================= -->
+    <section id="calculator" class="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+      <div class="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
+        <span class="inline-block px-3.5 py-1 rounded-full bg-pearSoft border-2 border-cocoa text-xs font-bold text-cocoa mb-3" data-i18n="calcBadge">ขั้นตอนที่ 1 • คำนวณพลังงาน</span>
+        <h2 class="font-brand font-bold text-3xl sm:text-4xl text-cocoa mb-3" data-i18n="calcTitle">คำนวณ BMR, TDEE และมาโคร</h2>
+        <p class="text-cocoaLight text-sm sm:text-base" data-i18n="calcDesc">
+          กรอกข้อมูลร่างกายของคุณเพื่อคำนวณพลังงานที่ควรได้รับต่อวัน พร้อมสัดส่วนโปรตีน คาร์บ และไขมัน
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+
+        <!-- Calculator Inputs Card -->
+        <div class="lg:col-span-7 bg-white rounded-3xl border-2 border-cocoa shadow-kawaii p-6 sm:p-8">
+          <div class="space-y-5">
+
+            <!-- Gender Toggle -->
+            <div>
+              <label class="block text-sm font-bold text-cocoa mb-2" data-i18n="labelGender">เพศ</label>
+              <div class="grid grid-cols-2 gap-3">
+                <button type="button" id="genderMale" data-gender="male" class="gender-btn btn-kawaii py-3 px-4 rounded-2xl border-2 border-cocoa font-bold text-sm flex items-center justify-center gap-2 bg-pearSoft shadow-kawaiiSm">
+                  <span>🙋‍♂️</span> <span data-i18n="genderMale">ชาย</span>
+                </button>
+                <button type="button" id="genderFemale" data-gender="female" class="gender-btn btn-kawaii py-3 px-4 rounded-2xl border-2 border-borderWarm font-bold text-sm flex items-center justify-center gap-2 bg-creamSoft text-cocoaLight hover:border-cocoa">
+                  <span>🙋‍♀️</span> <span data-i18n="genderFemale">หญิง</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Age / Height / Weight Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label for="calcAge" class="block text-sm font-bold text-cocoa mb-1.5" data-i18n="labelAge">อายุ (ปี)</label>
+                <input id="calcAge" type="number" min="12" max="100" value="26" class="w-full px-4 py-3 rounded-2xl bg-creamSoft border-2 border-borderWarm focus:border-cocoa focus:bg-white focus:outline-none font-bold text-cocoa transition-colors" />
+              </div>
+              <div>
+                <label for="calcHeight" class="block text-sm font-bold text-cocoa mb-1.5" data-i18n="labelHeight">ส่วนสูง (ซม.)</label>
+                <input id="calcHeight" type="number" min="100" max="240" value="170" class="w-full px-4 py-3 rounded-2xl bg-creamSoft border-2 border-borderWarm focus:border-cocoa focus:bg-white focus:outline-none font-bold text-cocoa transition-colors" />
+              </div>
+              <div>
+                <label for="calcWeight" class="block text-sm font-bold text-cocoa mb-1.5" data-i18n="labelWeight">น้ำหนัก (กก.)</label>
+                <input id="calcWeight" type="number" min="30" max="250" step="0.5" value="65" class="w-full px-4 py-3 rounded-2xl bg-creamSoft border-2 border-borderWarm focus:border-cocoa focus:bg-white focus:outline-none font-bold text-cocoa transition-colors" />
+              </div>
+            </div>
+
+            <!-- Activity Level -->
+            <div>
+              <label for="calcActivity" class="block text-sm font-bold text-cocoa mb-1.5" data-i18n="labelActivity">ระดับกิจกรรม</label>
+              <select id="calcActivity" class="w-full px-4 py-3 rounded-2xl bg-creamSoft border-2 border-borderWarm focus:border-cocoa focus:bg-white focus:outline-none font-semibold text-cocoa transition-colors">
+                <option value="1.2" data-i18n="act1">นั่งทำงานอยู่กับที่ (แทบไม่ออกกำลังกาย)</option>
+                <option value="1.375" data-i18n="act2">ออกกำลังกายเบาๆ (1–3 วัน/สัปดาห์)</option>
+                <option value="1.55" selected data-i18n="act3">ออกกำลังกายปานกลาง (3–5 วัน/สัปดาห์)</option>
+                <option value="1.725" data-i18n="act4">ออกกำลังกายหนัก (6–7 วัน/สัปดาห์)</option>
+                <option value="1.9" data-i18n="act5">ออกกำลังกายหนักมาก / ใช้แรงงานทุกวัน</option>
+              </select>
+            </div>
+
+            <!-- Goal Selection -->
+            <div>
+              <label class="block text-sm font-bold text-cocoa mb-2" data-i18n="labelGoal">เป้าหมายของคุณ</label>
+              <div class="grid grid-cols-3 gap-2.5 sm:gap-3">
+                <button type="button" data-goal="cut" class="goal-btn btn-kawaii py-3 px-2 sm:px-3 rounded-2xl border-2 border-borderWarm bg-creamSoft text-cocoaLight font-bold text-xs sm:text-sm text-center hover:border-cocoa">
+                  <span class="block text-lg mb-0.5">🔥</span>
+                  <span data-i18n="goalCut">ลดไขมัน</span>
+                  <span class="block text-[11px] font-medium opacity-80">-500 kcal</span>
+                </button>
+                <button type="button" data-goal="maintain" class="goal-btn btn-kawaii py-3 px-2 sm:px-3 rounded-2xl border-2 border-cocoa bg-pearSoft text-cocoa font-bold text-xs sm:text-sm text-center shadow-kawaiiSm">
+                  <span class="block text-lg mb-0.5">⚖️</span>
+                  <span data-i18n="goalMaintain">คงน้ำหนัก</span>
+                  <span class="block text-[11px] font-medium opacity-80">0 kcal</span>
+                </button>
+                <button type="button" data-goal="bulk" class="goal-btn btn-kawaii py-3 px-2 sm:px-3 rounded-2xl border-2 border-borderWarm bg-creamSoft text-cocoaLight font-bold text-xs sm:text-sm text-center hover:border-cocoa">
+                  <span class="block text-lg mb-0.5">💪</span>
+                  <span data-i18n="goalBulk">เพิ่มกล้าม</span>
+                  <span class="block text-[11px] font-medium opacity-80">+300 kcal</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Calculator Live Results Card -->
+        <div class="lg:col-span-5 bg-creamSoft rounded-3xl border-2 border-cocoa shadow-kawaii p-6 sm:p-8 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs font-bold uppercase tracking-wider text-cocoaLight" data-i18n="resHeading">เป้าหมายพลังงานต่อวัน</span>
+              <span class="px-2.5 py-1 rounded-xl bg-white border border-cocoa text-xs font-bold text-pearDark" data-i18n="resLive">คำนวณทันที</span>
+            </div>
+
+            <!-- Big Daily Target Number -->
+            <div class="bg-white rounded-2xl border-2 border-cocoa p-5 text-center shadow-kawaiiSm mb-5">
+              <div class="font-brand font-bold text-4xl sm:text-5xl text-cocoa" id="resTargetCal">2,473</div>
+              <div class="text-xs sm:text-sm font-bold text-cocoaLight mt-1" data-i18n="resKcalDay">กิโลแคลอรี่ / วัน</div>
+            </div>
+
+            <!-- BMR & TDEE Stat Pills -->
+            <div class="grid grid-cols-2 gap-3 mb-6">
+              <div class="bg-white rounded-2xl border-2 border-borderWarm p-3.5 text-center">
+                <div class="text-xs font-semibold text-cocoaLight" data-i18n="resBmr">BMR (เผาผลาญพื้นฐาน)</div>
+                <div class="font-brand font-bold text-xl text-cocoa mt-0.5"><span id="resBmrVal">1,596</span> <span class="text-xs font-normal">kcal</span></div>
+              </div>
+              <div class="bg-white rounded-2xl border-2 border-borderWarm p-3.5 text-center">
+                <div class="text-xs font-semibold text-cocoaLight" data-i18n="resTdee">TDEE (ใช้จริงต่อวัน)</div>
+                <div class="font-brand font-bold text-xl text-cocoa mt-0.5"><span id="resTdeeVal">2,473</span> <span class="text-xs font-normal">kcal</span></div>
+              </div>
+            </div>
+
+            <!-- Visual Macro Breakdown Bar -->
+            <div class="mb-6">
+              <div class="flex items-center justify-between text-xs font-bold text-cocoa mb-2">
+                <span data-i18n="resMacroTitle">สัดส่วนสารอาหารแนะนำ</span>
+                <span id="macroSplitLabel" class="text-cocoaLight">30P / 40C / 30F</span>
+              </div>
+
+              <!-- Segmented Bar -->
+              <div class="h-4 w-full rounded-full overflow-hidden flex border-2 border-cocoa bg-white mb-3">
+                <div id="barProtein" class="bg-pear h-full transition-all duration-300" style="width: 30%"></div>
+                <div id="barCarbs" class="bg-amber-400 h-full transition-all duration-300" style="width: 40%"></div>
+                <div id="barFat" class="bg-apple h-full transition-all duration-300" style="width: 30%"></div>
+              </div>
+
+              <!-- Macro Cards -->
+              <div class="grid grid-cols-3 gap-2 text-center">
+                <div class="bg-white rounded-xl border border-borderWarm p-2.5">
+                  <div class="text-[11px] font-bold text-pearDark flex items-center justify-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-pear"></span> <span data-i18n="macroProtein">โปรตีน</span>
+                  </div>
+                  <div class="font-brand font-bold text-base text-cocoa mt-0.5"><span id="resProtG">185</span>g</div>
+                  <div class="text-[10px] font-semibold text-cocoaLight" id="resProtPct">30%</div>
+                </div>
+                <div class="bg-white rounded-xl border border-borderWarm p-2.5">
+                  <div class="text-[11px] font-bold text-amber-600 flex items-center justify-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-amber-400"></span> <span data-i18n="macroCarbs">คาร์บ</span>
+                  </div>
+                  <div class="font-brand font-bold text-base text-cocoa mt-0.5"><span id="resCarbG">247</span>g</div>
+                  <div class="text-[10px] font-semibold text-cocoaLight" id="resCarbPct">40%</div>
+                </div>
+                <div class="bg-white rounded-xl border border-borderWarm p-2.5">
+                  <div class="text-[11px] font-bold text-apple flex items-center justify-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-apple"></span> <span data-i18n="macroFat">ไขมัน</span>
+                  </div>
+                  <div class="font-brand font-bold text-base text-cocoa mt-0.5"><span id="resFatG">82</span>g</div>
+                  <div class="text-[10px] font-semibold text-cocoaLight" id="resFatPct">30%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sync Goal Button -->
+          <button id="syncGoalBtn" type="button" class="btn-kawaii w-full py-3.5 px-5 rounded-2xl bg-pear hover:bg-pearDark text-cocoa font-bold text-base border-2 border-cocoa shadow-kawaii flex items-center justify-center gap-2">
+            <span>🎯</span>
+            <span data-i18n="btnSetGoal">ตั้งเป็นเป้าหมายประจำวัน</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         INTERACTIVE DAILY CALORIE TRACKER (MINI WEB APP)
+         ========================================================= -->
+    <section id="tracker" class="py-16 sm:py-20 bg-creamSoft border-y-2 border-borderWarm">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <div class="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
+          <span class="inline-block px-3.5 py-1 rounded-full bg-appleSoft border-2 border-cocoa text-xs font-bold text-cocoa mb-3" data-i18n="trackBadge">ขั้นตอนที่ 2 • บันทึกประจำวัน</span>
+          <h2 class="font-brand font-bold text-3xl sm:text-4xl text-cocoa mb-3" data-i18n="trackTitle">บันทึกแคลอรี่ประจำวัน</h2>
+          <p class="text-cocoaLight text-sm sm:text-base" data-i18n="trackDesc">
+            แตะเลือกเมนูยอดนิยมหรือเพิ่มมื้ออาหารเอง ดูวงแหวนแคลอรี่ มาโคร และอารมณ์ของน้องมาสคอตเปลี่ยนแบบสดๆ!
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+
+          <!-- Left Column: Progress Ring + Macros + Dynamic Mascot Mood -->
+          <div class="lg:col-span-5 space-y-6">
+
+            <!-- Ring & Macro Dashboard Card -->
+            <div class="bg-white rounded-3xl border-2 border-cocoa shadow-kawaii p-6 sm:p-7">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="font-brand font-bold text-lg text-cocoa" data-i18n="dashTitle">ความคืบหน้าวันนี้</h3>
+                <span id="dashGoalBadge" class="text-xs font-bold bg-creamSoft border border-cocoa rounded-xl px-3 py-1 text-cocoa">เป้าหมาย: 2,000 แคล</span>
+              </div>
+
+              <!-- Live SVG Circular Progress Ring -->
+              <div class="relative w-52 h-52 mx-auto my-4 flex items-center justify-center">
+                <svg class="w-full h-full" viewBox="0 0 180 180" aria-label="Daily Calorie Progress">
+                  <!-- Track -->
+                  <circle cx="90" cy="90" r="74" fill="none" stroke="#FAF5E8" stroke-width="16" />
+                  <circle cx="90" cy="90" r="74" fill="none" stroke="#EFE5D6" stroke-width="2" />
+                  <!-- Active Progress Ring -->
+                  <circle id="calProgressRing" class="progress-ring-circle" cx="90" cy="90" r="74" fill="none" stroke="#9BC53D" stroke-width="16" stroke-linecap="round" stroke-dasharray="464.96" stroke-dashoffset="464.96" />
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
+                  <span id="ringMainNum" class="font-brand font-bold text-3xl sm:text-4xl text-cocoa leading-none">2,000</span>
+                  <span id="ringMainLabel" class="text-xs font-bold text-cocoaLight mt-1.5" data-i18n="ringRemaining">แคลที่เหลือ</span>
+                  <span id="ringSubText" class="text-[11px] font-semibold text-pearDark mt-1 bg-pearSoft px-2.5 py-0.5 rounded-full">0 / 2,000</span>
+                </div>
+              </div>
+
+              <!-- Live Protein / Carbs / Fat Bars -->
+              <div class="space-y-3.5 mt-6 pt-5 border-t-2 border-dashed border-borderWarm">
+                <!-- Protein -->
+                <div>
+                  <div class="flex justify-between text-xs font-bold mb-1">
+                    <span class="text-cocoa flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-pear inline-block"></span> <span data-i18n="macroProtein">โปรตีน</span></span>
+                    <span class="text-cocoaLight"><span id="logProtCur" class="text-cocoa">0</span> / <span id="logProtGoal">150</span>g</span>
+                  </div>
+                  <div class="h-3 w-full bg-creamSoft rounded-full border border-borderWarm overflow-hidden">
+                    <div id="logProtBar" class="h-full bg-pear rounded-full transition-all duration-300" style="width: 0%"></div>
+                  </div>
+                </div>
+                <!-- Carbs -->
+                <div>
+                  <div class="flex justify-between text-xs font-bold mb-1">
+                    <span class="text-cocoa flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span> <span data-i18n="macroCarbs">คาร์บ</span></span>
+                    <span class="text-cocoaLight"><span id="logCarbCur" class="text-cocoa">0</span> / <span id="logCarbGoal">200</span>g</span>
+                  </div>
+                  <div class="h-3 w-full bg-creamSoft rounded-full border border-borderWarm overflow-hidden">
+                    <div id="logCarbBar" class="h-full bg-amber-400 rounded-full transition-all duration-300" style="width: 0%"></div>
+                  </div>
+                </div>
+                <!-- Fat -->
+                <div>
+                  <div class="flex justify-between text-xs font-bold mb-1">
+                    <span class="text-cocoa flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-apple inline-block"></span> <span data-i18n="macroFat">ไขมัน</span></span>
+                    <span class="text-cocoaLight"><span id="logFatCur" class="text-cocoa">0</span> / <span id="logFatGoal">67</span>g</span>
+                  </div>
+                  <div class="h-3 w-full bg-creamSoft rounded-full border border-borderWarm overflow-hidden">
+                    <div id="logFatBar" class="h-full bg-apple rounded-full transition-all duration-300" style="width: 0%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reactive Mascot Mood & Tip Banner -->
+            <div id="mascotMoodBanner" class="bg-pearSoft rounded-3xl border-2 border-cocoa shadow-kawaii p-5 flex items-center gap-4 transition-colors duration-300">
+              <div id="moodEmojiBox" class="w-14 h-14 shrink-0 rounded-2xl bg-white border-2 border-cocoa shadow-kawaiiSm flex items-center justify-center text-3xl">
+                🥰
+              </div>
+              <div>
+                <div id="moodTitle" class="font-brand font-bold text-base text-cocoa">เริ่มต้นวันใหม่สดใส!</div>
+                <p id="moodTip" class="text-xs sm:text-sm text-cocoaLight leading-snug mt-0.5">
+                  มาเริ่มบันทึกมื้อแรกกันเถอะ ลูกแพร์กรอบๆ หรือไข่ต้มสักฟองก็เยี่ยมเลยนะ!
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right Column: Quick-Add Chips + Custom Form + Logged Items -->
+          <div class="lg:col-span-7 space-y-6">
+
+            <!-- Quick-Add Food Chips Card -->
+            <div class="bg-white rounded-3xl border-2 border-cocoa shadow-kawaii p-6">
+              <div class="flex items-center justify-between mb-3.5">
+                <h3 class="font-brand font-bold text-lg text-cocoa" data-i18n="quickAddTitle">เมนูยอดนิยม (แตะเพื่อเพิ่ม)</h3>
+                <span class="text-xs font-semibold text-cocoaLight" data-i18n="quickAddSub">เพิ่มไวในคลิกเดียว</span>
+              </div>
+              <div id="quickChipsContainer" class="flex flex-wrap gap-2.5">
+                <!-- Populated dynamically by JS for bilingual support -->
+              </div>
+            </div>
+
+            <!-- Custom Food Entry Card -->
+            <div class="bg-white rounded-3xl border-2 border-cocoa shadow-kawaii p-6">
+              <h3 class="font-brand font-bold text-lg text-cocoa mb-4" data-i18n="customAddTitle">เพิ่มมื้ออาหารเอง</h3>
+              <form id="customFoodForm" class="space-y-3.5">
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                  <div class="sm:col-span-7">
+                    <label for="foodName" class="sr-only">Food Name</label>
+                    <input id="foodName" type="text" required placeholder="เช่น ส้มตำไทย, กะเพราอกไก่..." class="w-full px-4 py-3 rounded-2xl bg-creamSoft border-2 border-borderWarm focus:border-cocoa focus:bg-white focus:outline-none text-sm font-semibold text-cocoa" />
+                  </div>
+                  <div class="sm:col-span-5">
+                    <label for="foodKcal" class="sr-only">Calories</label>
+                    <input id="foodKcal" type="number" min="1" max="5000" required placeholder="แคลอรี่ (kcal)" class="w-full px-4 py-3 rounded-2xl bg-creamSoft border-2 border-borderWarm focus:border-cocoa focus:bg-white focus:outline-none text-sm font-bold text-cocoa" />
+                  </div>
+                </div>
+
+                <!-- Optional Macros Row -->
+                <div class="grid grid-cols-3 gap-2.5">
+                  <input id="foodProt" type="number" min="0" max="300" placeholder="โปรตีน (ก.)" class="w-full px-3 py-2.5 rounded-xl bg-creamSoft border-2 border-borderWarm focus:border-cocoa focus:bg-white focus:outline-none text-xs sm:text-sm font-semibold text-cocoa" />
+                  <input id="foodCarb" type="number" min="0" max="500" placeholder="คาร์บ (ก.)" class="w-full px-3 py-2.5 rounded-xl bg-creamSoft border-2 border-borderWarm focus:border-cocoa focus:bg-white focus:outline-none text-xs sm:text-sm font-semibold text-cocoa" />
+                  <input id="foodFat" type="number" min="0" max="300" placeholder="ไขมัน (ก.)" class="w-full px-3 py-2.5 rounded-xl bg-creamSoft border-2 border-borderWarm focus:border-cocoa focus:bg-white focus:outline-none text-xs sm:text-sm font-semibold text-cocoa" />
+                </div>
+
+                <button type="submit" class="btn-kawaii w-full py-3 px-5 rounded-2xl bg-pear hover:bg-pearDark text-cocoa font-bold text-sm sm:text-base border-2 border-cocoa shadow-kawaiiSm flex items-center justify-center gap-2">
+                  <span>➕</span>
+                  <span data-i18n="btnAddFood">เพิ่มลงบันทึกวันนี้</span>
+                </button>
+              </form>
+            </div>
+
+            <!-- Logged Items List Card -->
+            <div class="bg-white rounded-3xl border-2 border-cocoa shadow-kawaii p-6">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                  <h3 class="font-brand font-bold text-lg text-cocoa" data-i18n="logListTitle">มื้ออาหารวันนี้</h3>
+                  <span id="logCountBadge" class="px-2.5 py-0.5 rounded-full bg-creamSoft border border-cocoa text-xs font-bold text-cocoa">0</span>
+                </div>
+
+                <!-- Safe Inline Reset Control (No window.confirm) -->
+                <div class="flex items-center gap-2">
+                  <button id="resetDayBtn" type="button" class="text-xs font-bold text-apple hover:underline px-2.5 py-1.5 rounded-xl hover:bg-appleSoft transition-colors" data-i18n="btnResetDay">
+                    รีเซ็ตวันนี้
+                  </button>
+                  <div id="resetConfirmGroup" class="hidden items-center gap-1.5">
+                    <button id="confirmResetYes" type="button" class="text-xs font-bold bg-apple text-white px-3 py-1 rounded-xl border border-cocoa" data-i18n="btnConfirmClear">ยืนยันล้างทั้งหมด?</button>
+                    <button id="confirmResetNo" type="button" class="text-xs font-bold bg-creamSoft text-cocoa px-2.5 py-1 rounded-xl border border-cocoa" data-i18n="btnCancel">ยกเลิก</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Empty State / List -->
+              <div id="foodLogList" class="space-y-2.5 max-h-80 overflow-y-auto pr-1">
+                <!-- Populated dynamically by JS -->
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         FEATURES BENTO GRID
+         ========================================================= -->
+    <section id="features" class="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+      <div class="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
+        <span class="inline-block px-3.5 py-1 rounded-full bg-blushSoft border-2 border-cocoa text-xs font-bold text-cocoa mb-3" data-i18n="featBadge">ทำไมต้อง NABCALPRO</span>
+        <h2 class="font-brand font-bold text-3xl sm:text-4xl text-cocoa mb-3" data-i18n="featTitle">ออกแบบให้น่ารัก ใช้งานไวทันใจ</h2>
+        <p class="text-cocoaLight text-sm sm:text-base" data-i18n="featDesc">
+          ผสานสูตรคำนวณโภชนาการที่แม่นยำเข้ากับหน้าเว็บที่เบาและเร็ว เพื่อให้การนับแคลเป็นเรื่องสนุกทุกวัน
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Bento Card 1 -->
+        <div class="bg-white rounded-3xl border-2 border-cocoa shadow-kawaii p-6 sm:p-7 flex flex-col justify-between hover:-translate-y-1 transition-transform">
+          <div>
+            <div class="w-14 h-14 rounded-2xl bg-pearSoft border-2 border-cocoa shadow-kawaiiSm flex items-center justify-center text-2xl mb-5">
+              🧮
+            </div>
+            <h3 class="font-brand font-bold text-xl text-cocoa mb-2" data-i18n="feat1Title">คำนวณมาโครทันใจ</h3>
+            <p class="text-sm text-cocoaLight leading-relaxed" data-i18n="feat1Desc">
+              ใช้สูตร Mifflin-St Jeor ที่ยอมรับทั่วโลก สลับโหมดลดไขมัน คงน้ำหนัก หรือเพิ่มกล้าม พร้อมส่งค่าเข้าสมุดบันทึกในปุ่มเดียว
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-borderWarm text-xs font-bold text-pearDark">
+            BMR • TDEE • 30/40/30 Split
+          </div>
+        </div>
+
+        <!-- Bento Card 2 -->
+        <div class="bg-white rounded-3xl border-2 border-cocoa shadow-kawaii p-6 sm:p-7 flex flex-col justify-between hover:-translate-y-1 transition-transform">
+          <div>
+            <div class="w-14 h-14 rounded-2xl bg-appleSoft border-2 border-cocoa shadow-kawaiiSm flex items-center justify-center text-2xl mb-5">
+              🍐
+            </div>
+            <h3 class="font-brand font-bold text-xl text-cocoa mb-2" data-i18n="feat2Title">บันทึกไวไม่ยุ่งยาก</h3>
+            <p class="text-sm text-cocoaLight leading-relaxed" data-i18n="feat2Desc">
+              ไม่ต้องสมัครสมาชิกให้เสียเวลา แตะเพิ่มลูกแพร์ ชาเขียวมัทฉะ ส้มตำไทย หรือหมาล่าได้ทันที พร้อมน้องมาสคอตคอยให้กำลังใจ
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-borderWarm text-xs font-bold text-apple">
+            1-Tap Chips • Auto LocalStorage
+          </div>
+        </div>
+
+        <!-- Bento Card 3 -->
+        <div class="bg-white rounded-3xl border-2 border-cocoa shadow-kawaii p-6 sm:p-7 flex flex-col justify-between hover:-translate-y-1 transition-transform">
+          <div>
+            <div class="w-14 h-14 rounded-2xl bg-blushSoft border-2 border-cocoa shadow-kawaiiSm flex items-center justify-center text-2xl mb-5">
+              ⚡
+            </div>
+            <h3 class="font-brand font-bold text-xl text-cocoa mb-2" data-i18n="feat3Title">โหลดไวบน Vercel Edge</h3>
+            <p class="text-sm text-cocoaLight leading-relaxed" data-i18n="feat3Desc">
+              ตั้งค่าพร้อม Deploy บน Vercel ด้วย Clean URLs และแคชฟอนต์ NabCalPro-Real-v18-complete แบบ immutable ครบทั้ง WOFF2, WOFF และ TTF เพื่อความเร็วสูงสุด
+            </p>
+          </div>
+          <div class="mt-6 pt-4 border-t border-borderWarm text-xs font-bold text-cocoa">
+            Vercel Ready • WOFF2 + WOFF + TTF
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================================
+       CLEAN FOOTER
+       ========================================================= -->
+  <footer class="bg-white border-t-2 border-borderWarm py-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-pearSoft border-2 border-cocoa flex items-center justify-center text-lg shrink-0">🍐</div>
+        <div>
+          <div class="font-brand font-bold text-base text-cocoa">NabCalPro (นับแคลโปร)</div>
+          <div class="text-xs text-cocoaLight flex flex-wrap items-center gap-1.5 mt-0.5">
+            <span data-i18n="footerFont">ฟอนต์ประจำแบรนด์:</span>
+            <code class="px-2 py-0.5 rounded-lg bg-creamSoft border border-borderWarm font-mono text-[11px] font-bold text-cocoa">NabCalPro-Real-v18-complete (WOFF2 + WOFF + TTF)</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-6 text-xs sm:text-sm font-semibold text-cocoaLight">
+        <a href="#top" class="hover:text-cocoa transition-colors" data-i18n="footTop">กลับขึ้นบน</a>
+        <a href="#calculator" class="hover:text-cocoa transition-colors" data-i18n="navCalculator">คำนวณแคล</a>
+        <a href="#tracker" class="hover:text-cocoa transition-colors" data-i18n="navTracker">บันทึกอาหาร</a>
+        <a href="#features" class="hover:text-cocoa transition-colors" data-i18n="navFeatures">จุดเด่น</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Non-blocking Toast Notification Container -->
+  <div id="toast" role="status" aria-live="polite" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden items-center gap-2 bg-cocoa text-cream px-5 py-3 rounded-2xl border-2 border-pear shadow-kawaii text-sm font-bold max-w-[92vw] text-center">
+    <span id="toastIcon">✨</span>
+    <span id="toastMsg">อัปเดตเป้าหมายแล้ว!</span>
+  </div>
+
+  <!-- =========================================================
+       APPLICATION LOGIC (State, i18n, Calculator, Food Log)
+       ========================================================= -->
+  <script>
+    (function () {
+      'use strict';
+
+      /* ---------------------------------------------------------
+         1. BILINGUAL DICTIONARY (TH DEFAULT / EN)
+         --------------------------------------------------------- */
+      const i18n = {
+        en: {
+          brandSub: 'นับแคลโปร • Friendly Tracker',
+          navFeatures: 'Features',
+          navCalculator: 'Calculator',
+          navTracker: 'Food Log',
+          navCta: 'Start Counting',
+          heroBadge: 'Zero-Stress Calorie & Macro Buddy',
+          heroTitle1: 'Count Calories',
+          heroTitle2: 'With a Smile.',
+          heroSubtitle: 'Meet NabCalPro (นับแคลโปร) — your cozy daily nutrition companion. Calculate your exact BMR & TDEE in seconds, tap to log meals, and hit your macro goals without the spreadsheet headache.',
+          heroCtaPrimary: 'Calculate My Calories',
+          heroCtaSecondary: 'Open Daily Log',
+          heroPill1: 'Mifflin-St Jeor Formula',
+          heroPill2: 'Instant Local Save',
+          heroPill3: 'EN / TH Ready',
+          pillPear: 'Pear 100 kcal',
+          pillApple: 'Apple 95 kcal',
+          pillTarget: 'Target Met!',
+          heroMiniGoal: "Today's Goal:",
+
+          calcBadge: 'STEP 1 • SMART MATH',
+          calcTitle: 'BMR, TDEE & Macro Calculator',
+          calcDesc: 'Enter your stats below for instant Mifflin-St Jeor energy math and personalized Protein, Carbs, and Fat targets.',
+          labelGender: 'Gender',
+          genderMale: 'Male',
+          genderFemale: 'Female',
+          labelAge: 'Age (yrs)',
+          labelHeight: 'Height (cm)',
+          labelWeight: 'Weight (kg)',
+          labelActivity: 'Activity Level',
+          act1: 'Sedentary (Desk job, little/no exercise)',
+          act2: 'Lightly Active (Light exercise 1–3 days/wk)',
+          act3: 'Moderately Active (Moderate exercise 3–5 days/wk)',
+          act4: 'Active (Hard exercise 6–7 days/wk)',
+          act5: 'Very Active (Physical job or 2x training/day)',
+          labelGoal: 'Your Goal',
+          goalCut: 'Cut',
+          goalMaintain: 'Maintain',
+          goalBulk: 'Bulk',
+          resHeading: 'Your Daily Target',
+          resLive: 'Live Math',
+          resKcalDay: 'kcal / day',
+          resBmr: 'BMR (Resting)',
+          resTdee: 'TDEE (Maintenance)',
+          resMacroTitle: 'Recommended Macro Split',
+          macroProtein: 'Protein',
+          macroCarbs: 'Carbs',
+          macroFat: 'Fat',
+          btnSetGoal: 'Set as My Daily Goal',
+
+          trackBadge: 'STEP 2 • DAILY LOG',
+          trackTitle: 'Interactive Daily Food Log',
+          trackDesc: 'Tap a quick food chip or log your own meal. Watch your calorie ring, macros, and mascot mood update live!',
+          dashTitle: "Today's Progress",
+          ringRemaining: 'kcal left',
+          ringOver: 'kcal over',
+          quickAddTitle: 'Quick-Add Favorites',
+          quickAddSub: 'Tap to log instantly',
+          customAddTitle: 'Add Custom Meal',
+          phFoodName: 'e.g., Som Tum Thai, Pad Kra Pao...',
+          phFoodKcal: 'Calories (kcal)',
+          phProt: 'Protein (g)',
+          phCarb: 'Carbs (g)',
+          phFat: 'Fat (g)',
+          btnAddFood: "Add to Today's Log",
+          logListTitle: "Today's Meals",
+          btnResetDay: 'Reset Day',
+          btnConfirmClear: 'Clear All?',
+          btnCancel: 'Cancel',
+          emptyLogTitle: 'No meals logged yet!',
+          emptyLogSub: 'Tap any quick-add chip above to start your day.',
+
+          featBadge: 'WHY NABCALPRO',
+          featTitle: 'Built to Feel Cozy & Instant',
+          featDesc: 'Thoughtful nutrition math paired with lightweight web performance so tracking stays a daily joy.',
+          feat1Title: 'Instant Macro Math',
+          feat1Desc: 'Powered by the trusted Mifflin-St Jeor equation. Switch between Cut, Maintain, or Bulk and sync your exact protein, carb, and fat grams in one tap.',
+          feat2Title: 'Zero-Friction Logging',
+          feat2Desc: 'No mandatory sign-ups or clunky forms. Tap everyday favorites like Green Pear, Matcha Latte, Som Tum Thai, or Mala Bowl, and watch your mascot cheer you on.',
+          feat3Title: 'Fast Edge Delivery',
+          feat3Desc: 'Pre-configured for Vercel with Clean URLs, immutable caching for your custom NabCalPro-Real-v18-complete fonts (WOFF2 + WOFF + TTF), and zero heavy build steps.',
+          footerFont: 'Custom Typeface:',
+          footTop: 'Top',
+
+          toastGoalSynced: 'Daily goal synced to your tracker!',
+          toastAdded: 'Logged:',
+          toastRemoved: 'Removed item from log.',
+          toastReset: 'Daily log cleared for a fresh start!',
+
+          moods: {
+            empty: {
+              emoji: '🥰',
+              title: 'Fresh Start!',
+              tip: 'Log your first meal or snack! A crunchy green pear or boiled egg is a great kick-off.',
+              hero: 'Ready to count some yummy calories? 🍐✨'
+            },
+            good: {
+              emoji: '😄',
+              title: 'Cruising Nicely!',
+              tip: "You're making steady progress today. Remember to sip water and hit your protein target!",
+              hero: "You're doing awesome today! Keep going! 💪"
+            },
+            almost: {
+              emoji: '🌟',
+              title: 'Almost at Target!',
+              tip: 'Right in the sweet spot! A light fruit or protein snack will wrap up your day perfectly.',
+              hero: 'So close to your daily goal! Looking great! 🎯'
+            },
+            over: {
+              emoji: '🤗',
+              title: 'Slightly Over Target',
+              tip: "No stress at all! One day doesn't break a habit — enjoy your meal and take a light stroll.",
+              hero: "A little over today — no worries, we've got tomorrow! 💚"
+            }
+          }
+        },
+        th: {
+          brandSub: 'นับแคลโปร • คู่หูดูแลสุขภาพ',
+          navFeatures: 'จุดเด่น',
+          navCalculator: 'คำนวณแคล',
+          navTracker: 'บันทึกอาหาร',
+          navCta: 'เริ่มนับแคล',
+          heroBadge: 'ผู้ช่วยนับแคลและสารอาหารแบบไม่เครียด',
+          heroTitle1: 'นับแคลอรี่ง่ายๆ',
+          heroTitle2: 'สนุกได้ทุกมื้อ',
+          heroSubtitle: 'พบกับ NabCalPro (นับแคลโปร) — คู่หูดูแลโภชนาการประจำวัน คำนวณค่า BMR & TDEE แม่นยำในไม่กี่วินาที แตะบันทึกมื้ออาหารทันใจ พร้อมดูสัดส่วนมาโครแบบเรียลไทม์',
+          heroCtaPrimary: 'คำนวณแคลอรี่ของฉัน',
+          heroCtaSecondary: 'เปิดสมุดบันทึกวันนี้',
+          heroPill1: 'สูตรมาตรฐาน Mifflin-St Jeor',
+          heroPill2: 'บันทึกอัตโนมัติในเครื่อง',
+          heroPill3: 'รองรับ ไทย / อังกฤษ',
+          pillPear: 'ลูกแพร์ 100 แคล',
+          pillApple: 'แอปเปิ้ล 95 แคล',
+          pillTarget: 'ถึงเป้าหมาย!',
+          heroMiniGoal: 'เป้าหมายวันนี้:',
+
+          calcBadge: 'ขั้นตอนที่ 1 • คำนวณพลังงาน',
+          calcTitle: 'คำนวณ BMR, TDEE และมาโคร',
+          calcDesc: 'กรอกข้อมูลร่างกายของคุณเพื่อคำนวณพลังงานที่ควรได้รับต่อวัน พร้อมสัดส่วนโปรตีน คาร์บ และไขมัน',
+          labelGender: 'เพศ',
+          genderMale: 'ชาย',
+          genderFemale: 'หญิง',
+          labelAge: 'อายุ (ปี)',
+          labelHeight: 'ส่วนสูง (ซม.)',
+          labelWeight: 'น้ำหนัก (กก.)',
+          labelActivity: 'ระดับกิจกรรม',
+          act1: 'นั่งทำงานอยู่กับที่ (แทบไม่ออกกำลังกาย)',
+          act2: 'ออกกำลังกายเบาๆ (1–3 วัน/สัปดาห์)',
+          act3: 'ออกกำลังกายปานกลาง (3–5 วัน/สัปดาห์)',
+          act4: 'ออกกำลังกายหนัก (6–7 วัน/สัปดาห์)',
+          act5: 'ออกกำลังกายหนักมาก / ใช้แรงงานทุกวัน',
+          labelGoal: 'เป้าหมายของคุณ',
+          goalCut: 'ลดไขมัน',
+          goalMaintain: 'คงน้ำหนัก',
+          goalBulk: 'เพิ่มกล้าม',
+          resHeading: 'เป้าหมายพลังงานต่อวัน',
+          resLive: 'คำนวณทันที',
+          resKcalDay: 'กิโลแคลอรี่ / วัน',
+          resBmr: 'BMR (เผาผลาญพื้นฐาน)',
+          resTdee: 'TDEE (ใช้จริงต่อวัน)',
+          resMacroTitle: 'สัดส่วนสารอาหารแนะนำ',
+          macroProtein: 'โปรตีน',
+          macroCarbs: 'คาร์บ',
+          macroFat: 'ไขมัน',
+          btnSetGoal: 'ตั้งเป็นเป้าหมายประจำวัน',
+
+          trackBadge: 'ขั้นตอนที่ 2 • บันทึกประจำวัน',
+          trackTitle: 'บันทึกแคลอรี่ประจำวัน',
+          trackDesc: 'แตะเลือกเมนูยอดนิยมหรือเพิ่มมื้ออาหารเอง ดูวงแหวนแคลอรี่ มาโคร และอารมณ์ของน้องมาสคอตเปลี่ยนแบบสดๆ!',
+          dashTitle: 'ความคืบหน้าวันนี้',
+          ringRemaining: 'แคลที่เหลือ',
+          ringOver: 'เกินเป้าหมาย',
+          quickAddTitle: 'เมนูยอดนิยม (แตะเพื่อเพิ่ม)',
+          quickAddSub: 'เพิ่มไวในคลิกเดียว',
+          customAddTitle: 'เพิ่มมื้ออาหารเอง',
+          phFoodName: 'เช่น ส้มตำไทย, กะเพราอกไก่...',
+          phFoodKcal: 'แคลอรี่ (kcal)',
+          phProt: 'โปรตีน (ก.)',
+          phCarb: 'คาร์บ (ก.)',
+          phFat: 'ไขมัน (ก.)',
+          btnAddFood: 'เพิ่มลงบันทึกวันนี้',
+          logListTitle: 'มื้ออาหารวันนี้',
+          btnResetDay: 'รีเซ็ตวันนี้',
+          btnConfirmClear: 'ยืนยันล้างทั้งหมด?',
+          btnCancel: 'ยกเลิก',
+          emptyLogTitle: 'ยังไม่มีรายการอาหารวันนี้!',
+          emptyLogSub: 'แตะปุ่มเมนูยอดนิยมด้านบนเพื่อเริ่มบันทึกมื้อแรกเลย',
+
+          featBadge: 'ทำไมต้อง NABCALPRO',
+          featTitle: 'ออกแบบให้น่ารัก ใช้งานไวทันใจ',
+          featDesc: 'ผสานสูตรคำนวณโภชนาการที่แม่นยำเข้ากับหน้าเว็บที่เบาและเร็ว เพื่อให้การนับแคลเป็นเรื่องสนุกทุกวัน',
+          feat1Title: 'คำนวณมาโครทันใจ',
+          feat1Desc: 'ใช้สูตร Mifflin-St Jeor ที่ยอมรับทั่วโลก สลับโหมดลดไขมัน คงน้ำหนัก หรือเพิ่มกล้าม พร้อมส่งค่าเข้าสมุดบันทึกในปุ่มเดียว',
+          feat2Title: 'บันทึกไวไม่ยุ่งยาก',
+          feat2Desc: 'ไม่ต้องสมัครสมาชิกให้เสียเวลา แตะเพิ่มลูกแพร์ ชาเขียวมัทฉะ ส้มตำไทย หรือหมาล่าได้ทันที พร้อมน้องมาสคอตคอยให้กำลังใจ',
+          feat3Title: 'โหลดไวบน Vercel Edge',
+          feat3Desc: 'ตั้งค่าพร้อม Deploy บน Vercel ด้วย Clean URLs และแคชฟอนต์ NabCalPro-Real-v18-complete แบบ immutable ครบทั้ง WOFF2, WOFF และ TTF เพื่อความเร็วสูงสุด',
+          footerFont: 'ฟอนต์ประจำแบรนด์:',
+          footTop: 'กลับขึ้นบน',
+
+          toastGoalSynced: 'อัปเดตเป้าหมายเข้าสมุดบันทึกเรียบร้อย!',
+          toastAdded: 'เพิ่มแล้ว:',
+          toastRemoved: 'ลบรายการอาหารแล้ว',
+          toastReset: 'ล้างบันทึกประจำวันเรียบร้อย พร้อมเริ่มใหม่!',
+
+          moods: {
+            empty: {
+              emoji: '🥰',
+              title: 'เริ่มต้นวันใหม่สดใส!',
+              tip: 'มาเริ่มบันทึกมื้อแรกกันเถอะ ลูกแพร์กรอบๆ หรือไข่ต้มสักฟองก็เยี่ยมเลยนะ!',
+              hero: 'พร้อมนับแคลอร่อยๆ ไปด้วยกันหรือยัง? 🍐✨'
+            },
+            good: {
+              emoji: '😄',
+              title: 'กำลังไปได้สวยเลย!',
+              tip: 'คุมแคลได้ดีมาก อย่าลืมดื่มน้ำเปล่าเยอะๆ และเติมโปรตีนให้ครบด้วยนะ!',
+              hero: 'วันนี้ทำได้ดีมากเลย สู้ต่อไปนะ! 💪'
+            },
+            almost: {
+              emoji: '🌟',
+              title: 'ใกล้ถึงเป้าหมายแล้ว!',
+              tip: 'อยู่ในช่วงที่พอดีสุดๆ ทานผลไม้เบาๆ หรือโปรตีนเพิ่มอีกนิดก็จบวันแบบเป๊ะเลย!',
+              hero: 'ใกล้ครบเป้าหมายวันนี้แล้ว เก่งมาก! 🎯'
+            },
+            over: {
+              emoji: '🤗',
+              title: 'เกินเป้าหมายมานิดหน่อย',
+              tip: 'ไม่ต้องเครียดนะ! มื้ออร่อยวันนี้เติมความสุขให้ใจ เดินย่อยเบาๆ แล้วพรุ่งนี้ลุยต่อกัน!',
+              hero: 'เกินมานิดเดียวไม่เป็นไร พรุ่งนี้เริ่มใหม่ด้วยกันนะ! 💚'
+            }
+          }
+        }
+      };
+
+      /* ---------------------------------------------------------
+         2. QUICK-ADD PRESET FOODS (8 Everyday Favorites)
+         --------------------------------------------------------- */
+      const quickFoods = [
+        { id: 'pear', emoji: '🍐', en: 'Green Pear', th: 'ลูกแพร์เขียว', kcal: 100, p: 1, c: 26, f: 0 },
+        { id: 'apple', emoji: '🍎', en: 'Red Apple', th: 'แอปเปิ้ลแดง', kcal: 95, p: 0, c: 25, f: 0 },
+        { id: 'matcha', emoji: '🍵', en: 'Iced Matcha Latte', th: 'มัทฉะลาเต้เย็น', kcal: 140, p: 5, c: 20, f: 4 },
+        { id: 'chicken', emoji: '🍗', en: 'Grilled Chicken Breast', th: 'อกไก่ย่าง', kcal: 165, p: 31, c: 0, f: 4 },
+        { id: 'egg', emoji: '🥚', en: 'Boiled Egg', th: 'ไข่ต้ม', kcal: 70, p: 6, c: 1, f: 5 },
+        { id: 'rice', emoji: '🍚', en: 'Steamed Rice', th: 'ข้าวสวย 1 ทัพพี', kcal: 130, p: 3, c: 28, f: 0 },
+        { id: 'somtum', emoji: '🥗', en: 'Som Tum Thai', th: 'ส้มตำไทย', kcal: 120, p: 4, c: 22, f: 2 },
+        { id: 'mala', emoji: '🍲', en: 'Mala Hot Pot Bowl', th: 'หมาล่าทั่ง 1 ชาม', kcal: 420, p: 24, c: 32, f: 22 }
+      ];
+
+      /* ---------------------------------------------------------
+         3. APPLICATION STATE (Default to Thai + Safe LocalStorage)
+         --------------------------------------------------------- */
+      const STORAGE_KEY = 'nabcalpro_state_v18';
+      let state = {
+        lang: 'th',
+        calc: {
+          gender: 'male',
+          age: 26,
+          height: 170,
+          weight: 65,
+          activity: 1.55,
+          goal: 'maintain'
+        },
+        dailyGoal: {
+          kcal: 2000,
+          p: 150,
+          c: 200,
+          f: 67
+        },
+        logs: []
+      };
+
+      function loadState() {
+        try {
+          const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('nabcalpro_state_v1');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            state = {
+              ...state,
+              ...parsed,
+              lang: parsed.lang === 'en' ? 'en' : 'th',
+              calc: { ...state.calc, ...(parsed.calc || {}) },
+              dailyGoal: { ...state.dailyGoal, ...(parsed.dailyGoal || {}) },
+              logs: Array.isArray(parsed.logs) ? parsed.logs : []
+            };
+          }
+        } catch (err) {
+          console.warn('Could not load saved state:', err);
+        }
+      }
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (err) {
+          console.warn('Could not save state:', err);
+        }
+      }
+
+      /* ---------------------------------------------------------
+         4. DOM REFERENCES
+         --------------------------------------------------------- */
+      const el = {
+        langEnBtn: document.getElementById('langEnBtn'),
+        langThBtn: document.getElementById('langThBtn'),
+        heroSpeechText: document.getElementById('heroSpeechText'),
+        heroGoalDisplay: document.getElementById('heroGoalDisplay'),
+
+        genderBtns: document.querySelectorAll('.gender-btn'),
+        goalBtns: document.querySelectorAll('.goal-btn'),
+        calcAge: document.getElementById('calcAge'),
+        calcHeight: document.getElementById('calcHeight'),
+        calcWeight: document.getElementById('calcWeight'),
+        calcActivity: document.getElementById('calcActivity'),
+
+        resTargetCal: document.getElementById('resTargetCal'),
+        resBmrVal: document.getElementById('resBmrVal'),
+        resTdeeVal: document.getElementById('resTdeeVal'),
+        macroSplitLabel: document.getElementById('macroSplitLabel'),
+        barProtein: document.getElementById('barProtein'),
+        barCarbs: document.getElementById('barCarbs'),
+        barFat: document.getElementById('barFat'),
+        resProtG: document.getElementById('resProtG'),
+        resCarbG: document.getElementById('resCarbG'),
+        resFatG: document.getElementById('resFatG'),
+        resProtPct: document.getElementById('resProtPct'),
+        resCarbPct: document.getElementById('resCarbPct'),
+        resFatPct: document.getElementById('resFatPct'),
+        syncGoalBtn: document.getElementById('syncGoalBtn'),
+
+        dashGoalBadge: document.getElementById('dashGoalBadge'),
+        calProgressRing: document.getElementById('calProgressRing'),
+        ringMainNum: document.getElementById('ringMainNum'),
+        ringMainLabel: document.getElementById('ringMainLabel'),
+        ringSubText: document.getElementById('ringSubText'),
+        logProtCur: document.getElementById('logProtCur'),
+        logProtGoal: document.getElementById('logProtGoal'),
+        logProtBar: document.getElementById('logProtBar'),
+        logCarbCur: document.getElementById('logCarbCur'),
+        logCarbGoal: document.getElementById('logCarbGoal'),
+        logCarbBar: document.getElementById('logCarbBar'),
+        logFatCur: document.getElementById('logFatCur'),
+        logFatGoal: document.getElementById('logFatGoal'),
+        logFatBar: document.getElementById('logFatBar'),
+
+        mascotMoodBanner: document.getElementById('mascotMoodBanner'),
+        moodEmojiBox: document.getElementById('moodEmojiBox'),
+        moodTitle: document.getElementById('moodTitle'),
+        moodTip: document.getElementById('moodTip'),
+
+        quickChipsContainer: document.getElementById('quickChipsContainer'),
+        customFoodForm: document.getElementById('customFoodForm'),
+        foodName: document.getElementById('foodName'),
+        foodKcal: document.getElementById('foodKcal'),
+        foodProt: document.getElementById('foodProt'),
+        foodCarb: document.getElementById('foodCarb'),
+        foodFat: document.getElementById('foodFat'),
+        logCountBadge: document.getElementById('logCountBadge'),
+        foodLogList: document.getElementById('foodLogList'),
+
+        resetDayBtn: document.getElementById('resetDayBtn'),
+        resetConfirmGroup: document.getElementById('resetConfirmGroup'),
+        confirmResetYes: document.getElementById('confirmResetYes'),
+        confirmResetNo: document.getElementById('confirmResetNo'),
+
+        toast: document.getElementById('toast'),
+        toastIcon: document.getElementById('toastIcon'),
+        toastMsg: document.getElementById('toastMsg')
+      };
+
+      /* ---------------------------------------------------------
+         5. TOAST HELPER (Non-blocking notification)
+         --------------------------------------------------------- */
+      let toastTimer = null;
+      function showToast(message, icon = '✨') {
+        el.toastIcon.textContent = icon;
+        el.toastMsg.textContent = message;
+        el.toast.classList.remove('hidden');
+        el.toast.classList.add('flex', 'toast-show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          el.toast.classList.add('hidden');
+          el.toast.classList.remove('flex', 'toast-show');
+        }, 2800);
+      }
+
+      /* ---------------------------------------------------------
+         6. CALCULATOR MATH (Mifflin-St Jeor Equation)
+         --------------------------------------------------------- */
+      let latestCalcResult = { bmr: 1596, tdee: 2473, target: 2473, p: 185, c: 247, f: 82 };
+
+      function computeCalculator() {
+        const age = Math.max(10, Math.min(110, Number(el.calcAge.value) || 25));
+        const height = Math.max(100, Math.min(250, Number(el.calcHeight.value) || 170));
+        const weight = Math.max(25, Math.min(300, Number(el.calcWeight.value) || 65));
+        const activity = Number(el.calcActivity.value) || 1.55;
+
+        state.calc.age = age;
+        state.calc.height = height;
+        state.calc.weight = weight;
+        state.calc.activity = activity;
+
+        // Mifflin-St Jeor Formula
+        const bmrBase = 10 * weight + 6.25 * height - 5 * age;
+        const bmr = Math.round(state.calc.gender === 'male' ? bmrBase + 5 : bmrBase - 161);
+        const tdee = Math.round(bmr * activity);
+
+        // Goal calorie adjustment & macro split
+        let target = tdee;
+        let split = { p: 30, c: 40, f: 30 };
+
+        if (state.calc.goal === 'cut') {
+          target = Math.max(1200, tdee - 500);
+          split = { p: 35, c: 35, f: 30 };
+        } else if (state.calc.goal === 'bulk') {
+          target = tdee + 300;
+          split = { p: 25, c: 50, f: 25 };
+        }
+
+        const protG = Math.round((target * (split.p / 100)) / 4);
+        const carbG = Math.round((target * (split.c / 100)) / 4);
+        const fatG = Math.round((target * (split.f / 100)) / 9);
+
+        latestCalcResult = { bmr, tdee, target, p: protG, c: carbG, f: fatG };
+
+        // Update Calculator UI
+        el.resBmrVal.textContent = bmr.toLocaleString();
+        el.resTdeeVal.textContent = tdee.toLocaleString();
+        el.resTargetCal.textContent = target.toLocaleString();
+
+        el.macroSplitLabel.textContent = `${split.p}P / ${split.c}C / ${split.f}F`;
+        el.barProtein.style.width = `${split.p}%`;
+        el.barCarbs.style.width = `${split.c}%`;
+        el.barFat.style.width = `${split.f}%`;
+
+        el.resProtG.textContent = protG;
+        el.resCarbG.textContent = carbG;
+        el.resFatG.textContent = fatG;
+        el.resProtPct.textContent = `${split.p}%`;
+        el.resCarbPct.textContent = `${split.c}%`;
+        el.resFatPct.textContent = `${split.f}%`;
+
+        saveState();
+      }
+
+      function syncCalcButtonsUI() {
+        el.genderBtns.forEach((btn) => {
+          const isActive = btn.dataset.gender === state.calc.gender;
+          btn.classList.toggle('border-cocoa', isActive);
+          btn.classList.toggle('bg-pearSoft', isActive);
+          btn.classList.toggle('shadow-kawaiiSm', isActive);
+          btn.classList.toggle('text-cocoa', isActive);
+          btn.classList.toggle('border-borderWarm', !isActive);
+          btn.classList.toggle('bg-creamSoft', !isActive);
+          btn.classList.toggle('text-cocoaLight', !isActive);
+        });
+
+        el.goalBtns.forEach((btn) => {
+          const isActive = btn.dataset.goal === state.calc.goal;
+          btn.classList.toggle('border-cocoa', isActive);
+          btn.classList.toggle('bg-pearSoft', isActive);
+          btn.classList.toggle('shadow-kawaiiSm', isActive);
+          btn.classList.toggle('text-cocoa', isActive);
+          btn.classList.toggle('border-borderWarm', !isActive);
+          btn.classList.toggle('bg-creamSoft', !isActive);
+          btn.classList.toggle('text-cocoaLight', !isActive);
+        });
+      }
+
+      /* ---------------------------------------------------------
+         7. TRACKER RENDERING (Ring, Bars, Mood, Chips, Log)
+         --------------------------------------------------------- */
+      function renderQuickChips() {
+        el.quickChipsContainer.innerHTML = '';
+        quickFoods.forEach((item) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'btn-kawaii inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-creamSoft hover:bg-pearSoft border-2 border-cocoa shadow-kawaiiSm text-xs sm:text-sm font-bold text-cocoa';
+          const label = state.lang === 'th' ? item.th : item.en;
+          btn.innerHTML = `<span>${item.emoji}</span><span>${label}</span><span class="text-[11px] px-1.5 py-0.5 rounded-lg bg-white border border-borderWarm text-pearDark">${item.kcal}</span>`;
+          btn.addEventListener('click', () => {
+            addFoodItem({
+              name: label,
+              emoji: item.emoji,
+              kcal: item.kcal,
+              p: item.p,
+              c: item.c,
+              f: item.f
+            });
+          });
+          el.quickChipsContainer.appendChild(btn);
+        });
+      }
+
+      function addFoodItem({ name, emoji = '🍽️', kcal, p = 0, c = 0, f = 0 }) {
+        const entry = {
+          id: Date.now() + Math.random().toString(16).slice(2),
+          name: String(name).trim(),
+          emoji,
+          kcal: Math.max(1, Math.round(Number(kcal) || 0)),
+          p: Math.max(0, Math.round(Number(p) || 0)),
+          c: Math.max(0, Math.round(Number(c) || 0)),
+          f: Math.max(0, Math.round(Number(f) || 0)),
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+        state.logs.unshift(entry);
+        saveState();
+        renderTracker();
+        showToast(`${i18n[state.lang].toastAdded} ${entry.name} (+${entry.kcal} kcal)`, entry.emoji);
+      }
+
+      function removeFoodItem(id) {
+        state.logs = state.logs.filter((item) => item.id !== id);
+        saveState();
+        renderTracker();
+        showToast(i18n[state.lang].toastRemoved, '🗑️');
+      }
+
+      function renderTracker() {
+        const t = i18n[state.lang];
+        const goal = state.dailyGoal;
+
+        // Sum totals
+        const totals = state.logs.reduce(
+          (acc, item) => {
+            acc.kcal += item.kcal;
+            acc.p += item.p;
+            acc.c += item.c;
+            acc.f += item.f;
+            return acc;
+          },
+          { kcal: 0, p: 0, c: 0, f: 0 }
+        );
+
+        // Update Hero & Dashboard goal badges
+        el.heroGoalDisplay.textContent = `${goal.kcal.toLocaleString()} kcal`;
+        el.dashGoalBadge.textContent = state.lang === 'th'
+          ? `เป้าหมาย: ${goal.kcal.toLocaleString()} แคล`
+          : `Goal: ${goal.kcal.toLocaleString()} kcal`;
+
+        // Update SVG Progress Ring (r=74 => circumference = 2 * PI * 74 = 464.9557)
+        const circumference = 2 * Math.PI * 74;
+        const ratio = goal.kcal > 0 ? totals.kcal / goal.kcal : 0;
+        const clampedRatio = Math.min(1, Math.max(0, ratio));
+        const offset = circumference * (1 - clampedRatio);
+        el.calProgressRing.style.strokeDasharray = `${circumference}`;
+        el.calProgressRing.style.strokeDashoffset = `${offset}`;
+
+        const diff = goal.kcal - totals.kcal;
+        if (diff >= 0) {
+          el.ringMainNum.textContent = diff.toLocaleString();
+          el.ringMainLabel.textContent = t.ringRemaining;
+          el.calProgressRing.style.stroke = ratio >= 0.85 ? '#7EA82B' : '#9BC53D';
+          el.ringSubText.className = 'text-[11px] font-semibold text-pearDark mt-1 bg-pearSoft px-2.5 py-0.5 rounded-full';
+        } else {
+          el.ringMainNum.textContent = Math.abs(diff).toLocaleString();
+          el.ringMainLabel.textContent = t.ringOver;
+          el.calProgressRing.style.stroke = '#E55934';
+          el.ringSubText.className = 'text-[11px] font-semibold text-apple mt-1 bg-appleSoft px-2.5 py-0.5 rounded-full';
+        }
+        el.ringSubText.textContent = `${totals.kcal.toLocaleString()} / ${goal.kcal.toLocaleString()}`;
+
+        // Update Macro Bars
+        const pPct = Math.min(100, goal.p > 0 ? Math.round((totals.p / goal.p) * 100) : 0);
+        const cPct = Math.min(100, goal.c > 0 ? Math.round((totals.c / goal.c) * 100) : 0);
+        const fPct = Math.min(100, goal.f > 0 ? Math.round((totals.f / goal.f) * 100) : 0);
+
+        el.logProtCur.textContent = totals.p;
+        el.logProtGoal.textContent = goal.p;
+        el.logProtBar.style.width = `${pPct}%`;
+
+        el.logCarbCur.textContent = totals.c;
+        el.logCarbGoal.textContent = goal.c;
+        el.logCarbBar.style.width = `${cPct}%`;
+
+        el.logFatCur.textContent = totals.f;
+        el.logFatGoal.textContent = goal.f;
+        el.logFatBar.style.width = `${fPct}%`;
+
+        // Update Dynamic Mascot Mood & Hero Speech Bubble
+        let moodKey = 'empty';
+        let bannerBg = 'bg-pearSoft';
+        if (totals.kcal === 0) {
+          moodKey = 'empty';
+          bannerBg = 'bg-pearSoft';
+        } else if (ratio > 1) {
+          moodKey = 'over';
+          bannerBg = 'bg-appleSoft';
+        } else if (ratio >= 0.75) {
+          moodKey = 'almost';
+          bannerBg = 'bg-blushSoft';
+        } else {
+          moodKey = 'good';
+          bannerBg = 'bg-pearSoft';
+        }
+
+        const moodData = t.moods[moodKey];
+        el.mascotMoodBanner.className = `${bannerBg} rounded-3xl border-2 border-cocoa shadow-kawaii p-5 flex items-center gap-4 transition-colors duration-300`;
+        el.moodEmojiBox.textContent = moodData.emoji;
+        el.moodTitle.textContent = moodData.title;
+        el.moodTip.textContent = moodData.tip;
+        el.heroSpeechText.textContent = moodData.hero;
+
+        // Render Logged Items List
+        el.logCountBadge.textContent = state.logs.length;
+        el.foodLogList.innerHTML = '';
+
+        if (state.logs.length === 0) {
+          el.foodLogList.innerHTML = `
+            <div class="text-center py-8 px-4 rounded-2xl bg-creamSoft border-2 border-dashed border-borderWarm">
+              <div class="text-3xl mb-2">🍐</div>
+              <div class="font-bold text-sm text-cocoa">${t.emptyLogTitle}</div>
+              <div class="text-xs text-cocoaLight mt-1">${t.emptyLogSub}</div>
+            </div>
+          `;
+          return;
+        }
+
+        state.logs.forEach((item) => {
+          const row = document.createElement('div');
+          row.className = 'flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-creamSoft border-2 border-borderWarm hover:border-cocoa transition-colors';
+          row.innerHTML = `
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-10 h-10 shrink-0 rounded-xl bg-white border-2 border-cocoa flex items-center justify-center text-lg">
+                ${item.emoji}
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-sm text-cocoa truncate">${escapeHtml(item.name)}</div>
+                <div class="text-[11px] font-semibold text-cocoaLight flex flex-wrap gap-x-2 gap-y-0.5">
+                  <span>${item.time}</span>
+                  <span>• P ${item.p}g</span>
+                  <span>• C ${item.c}g</span>
+                  <span>• F ${item.f}g</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2.5 shrink-0">
+              <span class="font-brand font-bold text-sm sm:text-base text-pearDark bg-white px-2.5 py-1 rounded-xl border border-borderWarm">
+                +${item.kcal} <span class="text-[11px] font-normal text-cocoaLight">kcal</span>
+              </span>
+              <button type="button" class="remove-food-btn w-8 h-8 rounded-xl bg-white hover:bg-appleSoft text-cocoaLight hover:text-apple border border-borderWarm hover:border-apple flex items-center justify-center font-bold text-sm transition-colors" aria-label="Remove item">
+                ✕
+              </button>
+            </div>
+          `;
+          row.querySelector('.remove-food-btn').addEventListener('click', () => removeFoodItem(item.id));
+          el.foodLogList.appendChild(row);
+        });
+      }
+
+      function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      /* ---------------------------------------------------------
+         8. LANGUAGE SWITCHER ENGINE
+         --------------------------------------------------------- */
+      function applyLanguage(lang) {
+        state.lang = lang === 'en' ? 'en' : 'th';
+        document.documentElement.lang = state.lang;
+        const t = i18n[state.lang];
+
+        // Update toggle button styles
+        const isEn = state.lang === 'en';
+        el.langEnBtn.className = `px-2.5 py-1 text-xs font-bold rounded-lg transition-colors ${isEn ? 'bg-cocoa text-cream' : 'text-cocoa hover:bg-blushSoft'}`;
+        el.langThBtn.className = `px-2.5 py-1 text-xs font-bold rounded-lg transition-colors ${!isEn ? 'bg-cocoa text-cream' : 'text-cocoa hover:bg-blushSoft'}`;
+
+        // Translate all static [data-i18n] nodes
+        document.querySelectorAll('[data-i18n]').forEach((node) => {
+          const key = node.getAttribute('data-i18n');
+          if (t[key]) node.textContent = t[key];
+        });
+
+        // Update input placeholders
+        el.foodName.placeholder = t.phFoodName;
+        el.foodKcal.placeholder = t.phFoodKcal;
+        el.foodProt.placeholder = t.phProt;
+        el.foodCarb.placeholder = t.phCarb;
+        el.foodFat.placeholder = t.phFat;
+
+        renderQuickChips();
+        renderTracker();
+        saveState();
+      }
+
+      /* ---------------------------------------------------------
+         9. EVENT LISTENERS
+         --------------------------------------------------------- */
+      el.langEnBtn.addEventListener('click', () => applyLanguage('en'));
+      el.langThBtn.addEventListener('click', () => applyLanguage('th'));
+
+      // Calculator inputs
+      el.genderBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.calc.gender = btn.dataset.gender;
+          syncCalcButtonsUI();
+          computeCalculator();
+        });
+      });
+
+      el.goalBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.calc.goal = btn.dataset.goal;
+          syncCalcButtonsUI();
+          computeCalculator();
+        });
+      });
+
+      [el.calcAge, el.calcHeight, el.calcWeight, el.calcActivity].forEach((input) => {
+        input.addEventListener('input', computeCalculator);
+        input.addEventListener('change', computeCalculator);
+      });
+
+      // Sync calculated target to Daily Food Log
+      el.syncGoalBtn.addEventListener('click', () => {
+        state.dailyGoal = {
+          kcal: latestCalcResult.target,
+          p: latestCalcResult.p,
+          c: latestCalcResult.c,
+          f: latestCalcResult.f
+        };
+        saveState();
+        renderTracker();
+        showToast(i18n[state.lang].toastGoalSynced, '🎯');
+        document.getElementById('tracker').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+
+      // Custom food entry submit
+      el.customFoodForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = el.foodName.value.trim();
+        const kcal = Number(el.foodKcal.value);
+        if (!name || !kcal || kcal <= 0) return;
+
+        addFoodItem({
+          name,
+          emoji: '🍱',
+          kcal,
+          p: Number(el.foodProt.value) || 0,
+          c: Number(el.foodCarb.value) || 0,
+          f: Number(el.foodFat.value) || 0
+        });
+
+        el.customFoodForm.reset();
+        el.foodName.focus();
+      });
+
+      // Two-step inline Reset Day (No window.confirm)
+      el.resetDayBtn.addEventListener('click', () => {
+        if (state.logs.length === 0) return;
+        el.resetDayBtn.classList.add('hidden');
+        el.resetConfirmGroup.classList.remove('hidden');
+        el.resetConfirmGroup.classList.add('flex');
+      });
+
+      el.confirmResetNo.addEventListener('click', () => {
+        el.resetConfirmGroup.classList.add('hidden');
+        el.resetConfirmGroup.classList.remove('flex');
+        el.resetDayBtn.classList.remove('hidden');
+      });
+
+      el.confirmResetYes.addEventListener('click', () => {
+        state.logs = [];
+        saveState();
+        renderTracker();
+        el.resetConfirmGroup.classList.add('hidden');
+        el.resetConfirmGroup.classList.remove('flex');
+        el.resetDayBtn.classList.remove('hidden');
+        showToast(i18n[state.lang].toastReset, '✨');
+      });
+
+      /* ---------------------------------------------------------
+         10. INITIALIZE APP
+         --------------------------------------------------------- */
+      loadState();
+
+      // Hydrate calculator inputs from saved state
+      el.calcAge.value = state.calc.age;
+      el.calcHeight.value = state.calc.height;
+      el.calcWeight.value = state.calc.weight;
+      el.calcActivity.value = String(state.calc.activity);
+
+      syncCalcButtonsUI();
+      computeCalculator();
+      applyLanguage(state.lang);
+    })();
+  </script>
+</body>
+</html>
